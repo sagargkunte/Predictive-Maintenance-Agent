@@ -82,28 +82,6 @@ class MaintenanceAgent:
                 if self.model is not None:
                     # reshape because predict expects a 2d array
                     pred = self.model.predict([x])[0] # 1 for normal, -1 for anomaly
-                    score = self.model.score_samples([x])[0]
-                    
-                    # Normal score is usually >0 (up to 0.5ish), anomalies are < 0.
-                    # We map: score of 0.2 -> 0% risk, score of -0.3 -> 100% risk.
-                    risk_value = (0.2 - score) * 200
-                    risk_score = max(0, min(100, int(risk_value)))
-                    
-                    if risk_score > 80:
-                        severity = "critical"
-                    elif risk_score > 50:
-                        severity = "warning"
-                    else:
-                        severity = "running"
-                        
-                    # Push to backend UI
-                    try:
-                        requests.post(f"{BASE_URL}/predict/{self.machine_id}", json={
-                            "risk_score": risk_score,
-                            "severity": severity
-                        }, timeout=2)
-                    except:
-                        pass
                     
                     self.anomaly_window.append(pred)
                     if len(self.anomaly_window) > 10:

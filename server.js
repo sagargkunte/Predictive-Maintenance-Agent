@@ -30,7 +30,6 @@ console.log(`✅  History ready: ${Object.keys(HISTORY).length} machines × ${HI
 // ── In-memory stores ──────────────────────────────────────────────────────────
 const alerts       = [];  // { id, machine_id, reason, triggered_at, reading }
 const maintenances = [];  // { id, machine_id, slot, booked_at }
-const mlPredictions = {}; // machine_id -> { risk_score, severity }
 
 // ── Live state per machine (drifts over time for interesting SSE streams) ─────
 const liveState = {};
@@ -128,7 +127,6 @@ function nextLiveReading(machineId) {
     rpm:            fix(rpm, 0),
     current_A:      fix(current),
     status,
-    ml_prediction:  mlPredictions[machineId] || { risk_score: 0, severity: "NORMAL" },
   };
 }
 
@@ -175,20 +173,6 @@ app.get("/history/:machine_id", (req, res) => {
     count:    HISTORY[machine_id].length,
     readings: HISTORY[machine_id],
   });
-});
-
-/**
- * POST /predict/:machine_id
- * Agent pushes real-time model predictions
- */
-app.post("/predict/:machine_id", (req, res) => {
-  const { machine_id } = req.params;
-  const { risk_score, severity } = req.body;
-  if (!MACHINES.includes(machine_id)) {
-    return res.status(404).json({ error: "Unknown machine" });
-  }
-  mlPredictions[machine_id] = { risk_score, severity };
-  res.json({ success: true });
 });
 
 /**
