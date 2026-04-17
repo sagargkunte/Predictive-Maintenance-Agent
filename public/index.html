@@ -164,6 +164,10 @@ function buildCard(machineId) {
         <div class="metric-label">Current</div>
         <div class="metric-value" id="cur-${machineId}">—<span class="metric-unit">A</span></div>
       </div>
+      <div class="metric" style="background: rgba(0, 170, 255, 0.1); border-color: rgba(0, 170, 255, 0.3);">
+        <div class="metric-label" style="color: var(--blue);">AI Risk Level</div>
+        <div class="metric-value" id="risk-${machineId}" style="color: var(--blue);">—<span class="metric-unit">%</span></div>
+      </div>
     </div>
     <div class="sparkline-wrap">
       <div class="spark-label">Vibration (last 60 s)</div>
@@ -215,8 +219,16 @@ function applyReading(r) {
 
   const badge = document.getElementById(`badge-${m}`);
   if (badge) {
-    badge.className = `badge ${r.status}`;
-    badge.textContent = r.status.toUpperCase();
+    const overrideStatus = r.ml_prediction.severity.toLowerCase(); // critical, warning, running
+    
+    // Convert ML prediction string strictly for UI classes
+    let statusClass = overrideStatus === 'critical' ? 'fault' : overrideStatus === 'running' ? 'running' : 'warning';
+    
+    // Also respect simulation fault state just in case it's literally broken
+    if (r.status === 'fault') statusClass = 'fault';
+
+    badge.className = `badge ${statusClass}`;
+    badge.textContent = overrideStatus.toUpperCase();
   }
 
   const setVal = (id, val, cls) => {
@@ -232,6 +244,7 @@ function applyReading(r) {
   setVal(`vib-${m}`,  r.vibration_mm_s, vibClass(r.vibration_mm_s));
   setVal(`rpm-${m}`,  r.rpm,            "");
   setVal(`cur-${m}`,  r.current_A,      currentClass(r.current_A));
+  setVal(`risk-${m}`, r.ml_prediction.risk_score, r.ml_prediction.risk_score > 80 ? 'crit' : r.ml_prediction.risk_score > 50 ? 'warn' : '');
 
   const ts = document.getElementById(`ts-${m}`);
   if (ts) ts.textContent = r.timestamp;
