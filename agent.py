@@ -4,7 +4,7 @@ import json
 import threading
 import time
 from sseclient import SSEClient
-from sklearn.ensemble import IsolationForest
+from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 
 BASE_URL = "http://localhost:3000"
@@ -40,23 +40,55 @@ class MaintenanceAgent:
             self.feature_means = np.mean(X, axis=0)
             self.feature_stds = np.std(X, axis=0)
 
-            # Train Isolation Forest
-            print(f"[{self.machine_id}] Training Isolation Forest on {len(X)} samples...")
-            self.model = IsolationForest(contamination=0.01, random_state=42, n_estimators=100)
-            self.model.fit(X)
+            # Labels: 1 for normal (running), -1 for anomaly (warning/fault)
+            y = np.where(df["status"] == "running", 1, -1)
+
+            # Train Random Forest
+            print(f"[{self.machine_id}] Training Random Forest on {len(X)} samples...")
+            self.model = RandomForestClassifier(random_state=42, n_estimators=100)
+            self.model.fit(X, y)
             print(f"[{self.machine_id}] Model trained successfully.")
 
         except Exception as e:
             print(f"[{self.machine_id}] Error during training: {e}")
 
     def explain_anomaly(self, reading):
-        """Identify which feature is most abnormal by z-score"""
+        """Identify which features are abnormal by z-score"""
         values = np.array([reading[f] for f in FEATURES])
         z_scores = np.abs((values - self.feature_means) / (self.feature_stds + 1e-9))
-        max_idx = np.argmax(z_scores)
-        feature_name = FEATURES[max_idx]
-        val = values[max_idx]
-        return f"High deviation detected in {feature_name} (Value: {val:.2f}, Normal: {self.feature_means[max_idx]:.2f})"
+        
+        # Find all features with a z-score > 2.0
+        anomalous_indices = np.where(z_scores > 2.0)[0]
+        
+        # If no single feature exceeds the threshold, use the max one
+        if len(anomalous_indices) == 0:
+            anomalous_indices = [np.argmax(z_scores)]
+            
+        explanations = []
+        for idx in anomalous_indices:
+            feature_name = FEATURES[idx]
+            val = values[idx]
+            norm = self.feature_means[idx]
+            
+            if "vibration" in feature_name.lower():
+                explanations.append(f"Bearing wear detected (Vibration: {val:.2f} vs normal {norm:.2f})")
+            elif "current" in feature_name.lower():
+                if val > norm:
+                    explanations.append(f"Motor overload due to heavy load (Current: {val:.1f}A vs normal {norm:.1f}A)")
+                else:
+                    explanations.append(f"Motor has insufficient current (Current: {val:.1f}A vs normal {norm:.1f}A)")
+            elif "temperature" in feature_name.lower():
+                explanations.append(f"Thermal stress or cooling failure (Temp: {val:.1f}°C vs normal {norm:.1f}°C)")
+            elif "rpm" in feature_name.lower():
+                explanations.append(f"Load or mechanical issue (RPM: {val:.0f} vs normal {norm:.0f})")
+            else:
+                display_name = feature_name.replace("_C", "").replace("_mm_s", "").replace("_A", "").replace("temperature", "TEMP").replace("vibration", "VIB").upper()
+                explanations.append(f"{display_name} ({val:.1f} vs normal {norm:.1f})")
+            
+        if len(explanations) > 1:
+            return f"Multiple critical issues: {', '.join(explanations)}"
+        else:
+            return explanations[0]
 
     def start_stream(self):
         url = f"{BASE_URL}/stream/{self.machine_id}"
@@ -124,6 +156,7 @@ class MaintenanceAgent:
         except Exception as e:
             print(f"[{self.machine_id}] Failed to raise alert: {e}")
 
+# Bonus 
     def schedule_maintenance(self):
         try:
             payload = {"machine_id": self.machine_id}

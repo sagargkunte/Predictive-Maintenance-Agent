@@ -252,6 +252,13 @@ app.get("/alerts", (req, res) => {
 });
 
 /**
+ * GET /maintenances – return all scheduled maintenance bookings
+ */
+app.get("/maintenances", (req, res) => {
+  res.json({ count: maintenances.length, maintenances });
+});
+
+/**
  * GET /machines – list all machine IDs and their baselines
  */
 app.get("/machines", (req, res) => {
