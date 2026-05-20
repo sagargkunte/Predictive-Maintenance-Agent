@@ -10,7 +10,7 @@ import numpy as np
 BASE_URL = "http://localhost:3000"
 FEATURES = ["temperature_C", "vibration_mm_s", "rpm", "current_A"]
 MACHINES = ["CNC_01", "CNC_02", "PUMP_03", "CONVEYOR_04"]
-BOT_TOKEN = "8725151099:AAFcEMfk23S677BM_oivD6zIc2IDrhfMdDo"
+BOT_TOKEN = Your_Bot_Token_Goes_Here
 CHAT_ID = "6301282367"
 
 
