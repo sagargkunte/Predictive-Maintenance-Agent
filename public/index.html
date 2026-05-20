@@ -1,209 +1,525 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HACK MALENDAU 2026 — AI Sensor Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Predictive Maintainance System — AI Sensor Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@300;400;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-  :root {
-    --bg-dark:      #0b0d14;
-    --bg-gradient:  linear-gradient(135deg, #0b0d14 0%, #1a233a 50%, #0b0d14 100%);
-    --surface:      rgba(20, 24, 34, 0.65);
-    --surface-hov:  rgba(30, 36, 50, 0.85);
-    --border:       rgba(255, 255, 255, 0.08);
-    --green:        #00ff88;
-    --yellow:       #ffcc00;
-    --red:          #ff3355;
-    --blue:         #00d4ff;
-    --dim:          #6b7280;
-    --text:         #e5e7eb;
-    --mono:         'Share Tech Mono', monospace;
-    --sans:         'Outfit', sans-serif;
-  }
-  
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { 
-    background: var(--bg-gradient); color: var(--text); font-family: var(--sans); 
-    min-height: 100vh; overflow-x: hidden;
-    background-size: 200% 200%;
-    animation: moveGradient 15s ease infinite;
-  }
-  @keyframes moveGradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+    <style>
+      :root {
+        --bg-dark: #0b0d14;
+        --bg-gradient: linear-gradient(
+          135deg,
+          #0b0d14 0%,
+          #1a233a 50%,
+          #0b0d14 100%
+        );
+        --surface: rgba(20, 24, 34, 0.65);
+        --surface-hov: rgba(30, 36, 50, 0.85);
+        --border: rgba(255, 255, 255, 0.08);
+        --green: #00ff88;
+        --yellow: #ffcc00;
+        --red: #ff3355;
+        --blue: #00d4ff;
+        --dim: #6b7280;
+        --text: #e5e7eb;
+        --mono: "Share Tech Mono", monospace;
+        --sans: "Outfit", sans-serif;
+      }
 
-  /* ── Header ── */
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 32px;
-    background: rgba(10, 13, 20, 0.8);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 100;
-  }
-  .logo { font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em; color: var(--blue); text-shadow: 0 0 10px rgba(0,212,255,0.4); }
-  .logo span { color: #fff; font-weight: 300; }
-  .clock { font-family: var(--mono); font-size: 0.95rem; color: var(--green); text-shadow: 0 0 8px rgba(0,255,136,0.3); }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg-gradient);
+        color: var(--text);
+        font-family: var(--sans);
+        min-height: 100vh;
+        overflow-x: hidden;
+        background-size: 200% 200%;
+        animation: moveGradient 15s ease infinite;
+      }
+      @keyframes moveGradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
 
-  /* ── API Info Bar ── */
-  .api-bar {
-    display: flex; gap: 12px; flex-wrap: wrap;
-    padding: 12px 32px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border);
-    font-family: var(--mono); font-size: 0.75rem;
-  }
-  .api-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 6px; padding: 5px 12px; color: var(--text);
-    transition: all 0.3s ease;
-  }
-  .api-pill:hover { background: var(--surface-hov); transform: translateY(-1px); }
-  .method { font-weight: 700; }
-  .method.get  { color: var(--green); }
-  .method.post { color: var(--yellow); }
+      /* ── Header ── */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 32px;
+        background: rgba(10, 13, 20, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .logo {
+        font-size: 1.4rem;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        color: var(--blue);
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+      }
+      .logo span {
+        color: #fff;
+        font-weight: 300;
+      }
+      .clock {
+        font-family: var(--mono);
+        font-size: 0.95rem;
+        color: var(--green);
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
+      }
 
-  /* ── Grid ── */
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 24px; padding: 24px 32px; }
+      /* ── API Info Bar ── */
+      .api-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 12px 32px;
+        background: rgba(0, 0, 0, 0.2);
+        border-bottom: 1px solid var(--border);
+        font-family: var(--mono);
+        font-size: 0.75rem;
+      }
+      .api-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 5px 12px;
+        color: var(--text);
+        transition: all 0.3s ease;
+      }
+      .api-pill:hover {
+        background: var(--surface-hov);
+        transform: translateY(-1px);
+      }
+      .method {
+        font-weight: 700;
+      }
+      .method.get {
+        color: var(--green);
+      }
+      .method.post {
+        color: var(--yellow);
+      }
 
-  /* ── Glassmorphic Machine Card ── */
-  .card { 
-    background: var(--surface); 
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--border);
-    border-radius: 12px; padding: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .card:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4); }
-  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-  .machine-name { font-size: 1.8rem; font-weight: 900; letter-spacing: 0.05em; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
-  .machine-sub  { font-family: var(--mono); font-size: 0.75rem; color: var(--dim); margin-top: 4px; }
+      /* ── Grid ── */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+        gap: 24px;
+        padding: 24px 32px;
+      }
 
-  .badge {
-    font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
-    padding: 6px 12px; border-radius: 6px; text-transform: uppercase;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  }
-  .badge.running { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.3); text-shadow: 0 0 5px var(--green); }
-  .badge.warning { background: rgba(255,204,0,0.1);  color: var(--yellow); border: 1px solid rgba(255,204,0,0.3); text-shadow: 0 0 5px var(--yellow); }
-  .badge.fault   { background: rgba(255,51,85,0.15);  color: var(--red);    border: 1px solid var(--red); box-shadow: 0 0 15px rgba(255,51,85,0.4); animation: pulse 1s ease infinite alternate; }
-  .badge.waiting { background: rgba(107,114,128,0.15);  color: var(--dim);    border: 1px solid rgba(107,114,128,0.3); }
-  @keyframes pulse { from { opacity: 1; transform: scale(1); } to { opacity: 0.7; transform: scale(0.98); } }
+      /* ── Glassmorphic Machine Card ── */
+      .card {
+        background: var(--surface);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      .card:hover {
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+      }
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+      }
+      .machine-name {
+        font-size: 1.8rem;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        color: #fff;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      }
+      .machine-sub {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--dim);
+        margin-top: 4px;
+      }
 
-  /* ── Metrics Grid ── */
-  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-  .metric { 
-    background: rgba(0,0,0,0.2); border: 1px solid var(--border); 
-    border-radius: 8px; padding: 14px 16px;
-    display: flex; justify-content: space-between; align-items: center;
-    transition: all 0.3s ease;
-  }
-  .metric:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-  .metric-info { display: flex; flex-direction: column; }
-  .metric-label { font-size: 0.7rem; letter-spacing: 0.1em; color: var(--dim); text-transform: uppercase; margin-bottom: 4px; font-weight: 600; }
-  .metric-value-wrap { display: flex; align-items: baseline; gap: 4px; }
-  .metric-value { font-family: var(--mono); font-size: 1.6rem; font-weight: 400; color: #fff; transition: color 0.3s; }
-  .metric-value.warn { color: var(--yellow); text-shadow: 0 0 8px rgba(255,204,0,0.4); }
-  .metric-value.crit { color: var(--red); text-shadow: 0 0 8px rgba(255,51,85,0.4); }
-  .metric-unit  { font-size: 0.75rem; color: var(--dim); font-family: var(--sans); }
-  .trend { font-size: 1.2rem; font-weight: 900; }
-  .trend.up-bad { color: var(--red); }
-  .trend.up-good { color: var(--green); }
-  .trend.down-bad { color: var(--red); }
-  .trend.down-good { color: var(--green); }
-  .trend.neutral { color: var(--dim); }
+      .badge {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      }
+      .badge.running {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--green);
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        text-shadow: 0 0 5px var(--green);
+      }
+      .badge.warning {
+        background: rgba(255, 204, 0, 0.1);
+        color: var(--yellow);
+        border: 1px solid rgba(255, 204, 0, 0.3);
+        text-shadow: 0 0 5px var(--yellow);
+      }
+      .badge.fault {
+        background: rgba(255, 51, 85, 0.15);
+        color: var(--red);
+        border: 1px solid var(--red);
+        box-shadow: 0 0 15px rgba(255, 51, 85, 0.4);
+        animation: pulse 1s ease infinite alternate;
+      }
+      .badge.waiting {
+        background: rgba(107, 114, 128, 0.15);
+        color: var(--dim);
+        border: 1px solid rgba(107, 114, 128, 0.3);
+      }
+      @keyframes pulse {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0.7;
+          transform: scale(0.98);
+        }
+      }
 
-  /* ── Interactive Chart Container ── */
-  .chart-wrapper { width: 100%; height: 220px; background: rgba(0,0,0,0.25); border-radius: 8px; padding: 10px; border: 1px solid var(--border); margin-bottom: 12px; }
+      /* ── Metrics Grid ── */
+      .metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .metric {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+      }
+      .metric:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+      .metric-info {
+        display: flex;
+        flex-direction: column;
+      }
+      .metric-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        color: var(--dim);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+      .metric-value-wrap {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+      }
+      .metric-value {
+        font-family: var(--mono);
+        font-size: 1.6rem;
+        font-weight: 400;
+        color: #fff;
+        transition: color 0.3s;
+      }
+      .metric-value.warn {
+        color: var(--yellow);
+        text-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+      }
+      .metric-value.crit {
+        color: var(--red);
+        text-shadow: 0 0 8px rgba(255, 51, 85, 0.4);
+      }
+      .metric-unit {
+        font-size: 0.75rem;
+        color: var(--dim);
+        font-family: var(--sans);
+      }
+      .trend {
+        font-size: 1.2rem;
+        font-weight: 900;
+      }
+      .trend.up-bad {
+        color: var(--red);
+      }
+      .trend.up-good {
+        color: var(--green);
+      }
+      .trend.down-bad {
+        color: var(--red);
+      }
+      .trend.down-good {
+        color: var(--green);
+      }
+      .trend.neutral {
+        color: var(--dim);
+      }
 
-  /* ── Last reading ── */
-  .ts { font-family: var(--mono); font-size: 0.7rem; color: var(--dim); text-align: right; }
+      /* ── Interactive Chart Container ── */
+      .chart-wrapper {
+        width: 100%;
+        height: 220px;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 8px;
+        padding: 10px;
+        border: 1px solid var(--border);
+        margin-bottom: 12px;
+      }
 
-  /* ── Bottom Panels (Alerts & Maintenance) ── */
-  .bottom-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px 32px; background: rgba(0,0,0,0.2); border-top: 1px solid var(--border); margin-top: 20px; }
-  .alerts-section, .maintenances-section { display: flex; flex-direction: column; height: 100%; }
-  .section-title { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.1em; color: #fff; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-  .section-title .pulse-dot { width: 10px; height: 10px; background: var(--red); border-radius: 50%; box-shadow: 0 0 10px var(--red); animation: pulse 1s infinite alternate; }
-  
-  .alert-list { display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; padding-right: 10px; flex-grow: 1; }
-  .alert-item {
-    display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center;
-    background: linear-gradient(90deg, rgba(255,51,85,0.15) 0%, rgba(255,51,85,0.05) 100%);
-    border-left: 4px solid var(--red);
-    border-radius: 0 6px 6px 0; padding: 14px 20px; font-family: var(--sans); font-size: 0.9rem;
-    animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .maint-item {
-    display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center;
-    background: linear-gradient(90deg, rgba(0,212,255,0.15) 0%, rgba(0,212,255,0.05) 100%);
-    border-left: 4px solid var(--blue);
-    border-radius: 0 6px 6px 0; padding: 14px 20px; font-family: var(--sans); font-size: 0.9rem;
-    animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-  .alert-machine { color: #fff; font-weight: 700; font-family: var(--mono); padding: 4px 8px; background: rgba(255,51,85,0.2); border-radius: 4px;}
-  .maint-machine { color: #fff; font-weight: 700; font-family: var(--mono); padding: 4px 8px; background: rgba(0,212,255,0.2); border-radius: 4px;}
-  .alert-reason, .maint-reason  { color: #e5e7eb; line-height: 1.4; }
-  .alert-time    { color: var(--dim); white-space: nowrap; font-family: var(--mono); font-size: 0.8rem; }
-  .no-alerts { color: var(--dim); font-family: var(--mono); font-size: 0.9rem; padding: 20px; background: var(--surface); border-radius: 8px; border: 1px dashed var(--border); text-align: center; }
+      /* ── Last reading ── */
+      .ts {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--dim);
+        text-align: right;
+      }
 
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg-dark); }
-  ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-</style>
-</head>
-<body>
+      /* ── Bottom Panels (Alerts & Maintenance) ── */
+      .bottom-panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        padding: 24px 32px;
+        background: rgba(0, 0, 0, 0.2);
+        border-top: 1px solid var(--border);
+        margin-top: 20px;
+      }
+      .alerts-section,
+      .maintenances-section {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: #fff;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-title .pulse-dot {
+        width: 10px;
+        height: 10px;
+        background: var(--red);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--red);
+        animation: pulse 1s infinite alternate;
+      }
 
-<header>
-  <div class="logo">🏭 HACK MALENDAU <span>2026</span></div>
-  <div class="clock" id="clock">--:--:--</div>
-</header>
+      .alert-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 10px;
+        flex-grow: 1;
+      }
+      .alert-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 16px;
+        align-items: center;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 51, 85, 0.15) 0%,
+          rgba(255, 51, 85, 0.05) 100%
+        );
+        border-left: 4px solid var(--red);
+        border-radius: 0 6px 6px 0;
+        padding: 14px 20px;
+        font-family: var(--sans);
+        font-size: 0.9rem;
+        animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .maint-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 16px;
+        align-items: center;
+        background: linear-gradient(
+          90deg,
+          rgba(0, 212, 255, 0.15) 0%,
+          rgba(0, 212, 255, 0.05) 100%
+        );
+        border-left: 4px solid var(--blue);
+        border-radius: 0 6px 6px 0;
+        padding: 14px 20px;
+        font-family: var(--sans);
+        font-size: 0.9rem;
+        animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      .alert-machine {
+        color: #fff;
+        font-weight: 700;
+        font-family: var(--mono);
+        padding: 4px 8px;
+        background: rgba(255, 51, 85, 0.2);
+        border-radius: 4px;
+      }
+      .maint-machine {
+        color: #fff;
+        font-weight: 700;
+        font-family: var(--mono);
+        padding: 4px 8px;
+        background: rgba(0, 212, 255, 0.2);
+        border-radius: 4px;
+      }
+      .alert-reason,
+      .maint-reason {
+        color: #e5e7eb;
+        line-height: 1.4;
+      }
+      .alert-time {
+        color: var(--dim);
+        white-space: nowrap;
+        font-family: var(--mono);
+        font-size: 0.8rem;
+      }
+      .no-alerts {
+        color: var(--dim);
+        font-family: var(--mono);
+        font-size: 0.9rem;
+        padding: 20px;
+        background: var(--surface);
+        border-radius: 8px;
+        border: 1px dashed var(--border);
+        text-align: center;
+      }
 
-<div class="api-bar">
-  <div class="api-pill"><span class="method get">GET</span> /stream/{id}</div>
-  <div class="api-pill"><span class="method get">GET</span> /history/{id}</div>
-  <div class="api-pill"><span class="method post">POST</span> /alert</div>
-  <div class="api-pill"><span class="method post">POST</span> /schedule-maintenance</div>
-</div>
+      /* ── Scrollbar ── */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg-dark);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--dim);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        🏭 Predictive Maintainance System <span>2026</span>
+      </div>
+      <div class="clock" id="clock">--:--:--</div>
+    </header>
 
-<div class="grid" id="grid"></div>
+    <div class="api-bar">
+      <div class="api-pill">
+        <span class="method get">GET</span> /stream/{id}
+      </div>
+      <div class="api-pill">
+        <span class="method get">GET</span> /history/{id}
+      </div>
+      <div class="api-pill"><span class="method post">POST</span> /alert</div>
+      <div class="api-pill">
+        <span class="method post">POST</span> /schedule-maintenance
+      </div>
+    </div>
 
-<div class="bottom-panels">
-  <div class="alerts-section">
-    <div class="section-title"><div class="pulse-dot"></div> System Anomalies & Alerts</div>
-    <div class="alert-list" id="alert-list"><div class="no-alerts">Initializing Machine Learning Agent Link...</div></div>
-  </div>
-  
-  <div class="maintenances-section">
-    <div class="section-title">🔧 Scheduled Maintenance</div>
-    <div class="alert-list" id="maintenance-list"><div class="no-alerts">No active maintenance bookings scheduled.</div></div>
-  </div>
-</div>
+    <div class="grid" id="grid"></div>
 
-<script>
-Chart.defaults.color = '#9ca3af';
-Chart.defaults.font.family = "'Outfit', sans-serif";
-Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
+    <div class="bottom-panels">
+      <div class="alerts-section">
+        <div class="section-title">
+          <div class="pulse-dot"></div>
+          System Anomalies & Alerts
+        </div>
+        <div class="alert-list" id="alert-list">
+          <div class="no-alerts">
+            Initializing Machine Learning Agent Link...
+          </div>
+        </div>
+      </div>
 
-const MACHINES = ["CNC_01", "CNC_02", "PUMP_03", "CONVEYOR_04"];
-const charts = {};
-const MAX_DATAPOINTS = 100;
-const PREV_VALUES = {}; // To calculate trends
+      <div class="maintenances-section">
+        <div class="section-title">🔧 Scheduled Maintenance</div>
+        <div class="alert-list" id="maintenance-list">
+          <div class="no-alerts">No active maintenance bookings scheduled.</div>
+        </div>
+      </div>
+    </div>
 
-// ── Build UI Cards ────────────────────────────────────────────────────────────
-function buildCard(machineId) {
-  PREV_VALUES[machineId] = { temp: [], vib: [], rpm: [], cur: [] };
-  const card = document.createElement("div");
-  card.className = "card";
-  card.id = `card-${machineId}`;
-  card.innerHTML = `
+    <script>
+      Chart.defaults.color = "#9ca3af";
+      Chart.defaults.font.family = "'Outfit', sans-serif";
+      Chart.defaults.scale.grid.color = "rgba(255, 255, 255, 0.05)";
+
+      const MACHINES = ["CNC_01", "CNC_02", "PUMP_03", "CONVEYOR_04"];
+      const charts = {};
+      const MAX_DATAPOINTS = 100;
+      const PREV_VALUES = {}; // To calculate trends
+
+      // ── Build UI Cards ────────────────────────────────────────────────────────────
+      function buildCard(machineId) {
+        PREV_VALUES[machineId] = { temp: [], vib: [], rpm: [], cur: [] };
+        const card = document.createElement("div");
+        card.className = "card";
+        card.id = `card-${machineId}`;
+        card.innerHTML = `
     <div class="card-header">
       <div>
         <div class="machine-name">${machineId}</div>
@@ -256,290 +572,357 @@ function buildCard(machineId) {
     </div>
     <div class="ts" id="ts-${machineId}">Waiting for AI Agent data…</div>
   `;
-  return card;
-}
+        return card;
+      }
 
-const grid = document.getElementById("grid");
-MACHINES.forEach(m => grid.appendChild(buildCard(m)));
+      const grid = document.getElementById("grid");
+      MACHINES.forEach((m) => grid.appendChild(buildCard(m)));
 
-// ── Chart.js Initialization ─────────────────────────────────────────────────
-async function initCharts() {
-  for (const m of MACHINES) {
-    const ctx = document.getElementById(`chart-${m}`).getContext('2d');
-    
-    // Create gradients
-    const gradTemp = ctx.createLinearGradient(0, 0, 0, 220);
-    gradTemp.addColorStop(0, 'rgba(255, 51, 85, 0.5)');
-    gradTemp.addColorStop(1, 'rgba(255, 51, 85, 0.0)');
-    
-    const gradVib = ctx.createLinearGradient(0, 0, 0, 220);
-    gradVib.addColorStop(0, 'rgba(0, 212, 255, 0.5)');
-    gradVib.addColorStop(1, 'rgba(0, 212, 255, 0.0)');
+      // ── Chart.js Initialization ─────────────────────────────────────────────────
+      async function initCharts() {
+        for (const m of MACHINES) {
+          const ctx = document.getElementById(`chart-${m}`).getContext("2d");
 
-    const gradRpm = ctx.createLinearGradient(0, 0, 0, 220);
-    gradRpm.addColorStop(0, 'rgba(0, 255, 136, 0.5)');
-    gradRpm.addColorStop(1, 'rgba(0, 255, 136, 0.0)');
+          // Create gradients
+          const gradTemp = ctx.createLinearGradient(0, 0, 0, 220);
+          gradTemp.addColorStop(0, "rgba(255, 51, 85, 0.5)");
+          gradTemp.addColorStop(1, "rgba(255, 51, 85, 0.0)");
 
-    const gradCur = ctx.createLinearGradient(0, 0, 0, 220);
-    gradCur.addColorStop(0, 'rgba(255, 204, 0, 0.5)');
-    gradCur.addColorStop(1, 'rgba(255, 204, 0, 0.0)');
+          const gradVib = ctx.createLinearGradient(0, 0, 0, 220);
+          gradVib.addColorStop(0, "rgba(0, 212, 255, 0.5)");
+          gradVib.addColorStop(1, "rgba(0, 212, 255, 0.0)");
 
-    charts[m] = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: 'Temp (°C)',
-            borderColor: '#ff3355',
-            backgroundColor: gradTemp,
-            borderWidth: 2,
-            pointRadius: 0,
-            fill: true,
-            tension: 0.4,
-            yAxisID: 'yTemp',
-            data: []
-          },
-          {
-            label: 'Vib (mm/s)',
-            borderColor: '#00d4ff',
-            backgroundColor: gradVib,
-            borderWidth: 2,
-            pointRadius: 0,
-            fill: true,
-            tension: 0.4,
-            yAxisID: 'yVib',
-            data: []
-          },
-          {
-            label: 'RPM',
-            borderColor: '#00ff88',
-            backgroundColor: gradRpm,
-            borderWidth: 2,
-            pointRadius: 0,
-            fill: true,
-            tension: 0.4,
-            yAxisID: 'yRpm',
-            data: []
-          },
-          {
-            label: 'Current (A)',
-            borderColor: '#ffcc00',
-            backgroundColor: gradCur,
-            borderWidth: 2,
-            pointRadius: 0,
-            fill: true,
-            tension: 0.4,
-            yAxisID: 'yCur',
-            data: []
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 0 }, // Disable animation for performance on fast SSE
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, usePointStyle: true, font: {size: 10} } },
-          tooltip: { mode: 'index', intersect: false }
-        },
-        scales: {
-          x: { display: false }, // Hide x axis to keep it clean
-          yTemp: { 
-            type: 'linear', display: true, position: 'left',
-            grid: { color: 'rgba(255,255,255,0.05)' }
-          },
-          yVib: {
-            type: 'linear', display: true, position: 'right',
-            grid: { drawOnChartArea: false } // Prevent grid line overlap
-          },
-          yRpm: {
-            type: 'linear', display: false, position: 'left',
-            grid: { drawOnChartArea: false }
-          },
-          yCur: {
-            type: 'linear', display: false, position: 'right',
-            grid: { drawOnChartArea: false }
+          const gradRpm = ctx.createLinearGradient(0, 0, 0, 220);
+          gradRpm.addColorStop(0, "rgba(0, 255, 136, 0.5)");
+          gradRpm.addColorStop(1, "rgba(0, 255, 136, 0.0)");
+
+          const gradCur = ctx.createLinearGradient(0, 0, 0, 220);
+          gradCur.addColorStop(0, "rgba(255, 204, 0, 0.5)");
+          gradCur.addColorStop(1, "rgba(255, 204, 0, 0.0)");
+
+          charts[m] = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: [],
+              datasets: [
+                {
+                  label: "Temp (°C)",
+                  borderColor: "#ff3355",
+                  backgroundColor: gradTemp,
+                  borderWidth: 2,
+                  pointRadius: 0,
+                  fill: true,
+                  tension: 0.4,
+                  yAxisID: "yTemp",
+                  data: [],
+                },
+                {
+                  label: "Vib (mm/s)",
+                  borderColor: "#00d4ff",
+                  backgroundColor: gradVib,
+                  borderWidth: 2,
+                  pointRadius: 0,
+                  fill: true,
+                  tension: 0.4,
+                  yAxisID: "yVib",
+                  data: [],
+                },
+                {
+                  label: "RPM",
+                  borderColor: "#00ff88",
+                  backgroundColor: gradRpm,
+                  borderWidth: 2,
+                  pointRadius: 0,
+                  fill: true,
+                  tension: 0.4,
+                  yAxisID: "yRpm",
+                  data: [],
+                },
+                {
+                  label: "Current (A)",
+                  borderColor: "#ffcc00",
+                  backgroundColor: gradCur,
+                  borderWidth: 2,
+                  pointRadius: 0,
+                  fill: true,
+                  tension: 0.4,
+                  yAxisID: "yCur",
+                  data: [],
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: { duration: 0 }, // Disable animation for performance on fast SSE
+              interaction: { mode: "index", intersect: false },
+              plugins: {
+                legend: {
+                  display: true,
+                  position: "top",
+                  align: "end",
+                  labels: {
+                    boxWidth: 10,
+                    usePointStyle: true,
+                    font: { size: 10 },
+                  },
+                },
+                tooltip: { mode: "index", intersect: false },
+              },
+              scales: {
+                x: { display: false }, // Hide x axis to keep it clean
+                yTemp: {
+                  type: "linear",
+                  display: true,
+                  position: "left",
+                  grid: { color: "rgba(255,255,255,0.05)" },
+                },
+                yVib: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  grid: { drawOnChartArea: false }, // Prevent grid line overlap
+                },
+                yRpm: {
+                  type: "linear",
+                  display: false,
+                  position: "left",
+                  grid: { drawOnChartArea: false },
+                },
+                yCur: {
+                  type: "linear",
+                  display: false,
+                  position: "right",
+                  grid: { drawOnChartArea: false },
+                },
+              },
+            },
+          });
+
+          // Pre-fill history data
+          try {
+            const res = await fetch(`/history/${m}`);
+            if (res.ok) {
+              const body = await res.json();
+              // Get the latest X points from history
+              const relevant = body.readings.slice(-MAX_DATAPOINTS);
+
+              relevant.forEach((r) => {
+                charts[m].data.labels.push(r.timestamp);
+                charts[m].data.datasets[0].data.push(r.temperature_C);
+                charts[m].data.datasets[1].data.push(r.vibration_mm_s);
+                charts[m].data.datasets[2].data.push(r.rpm);
+                charts[m].data.datasets[3].data.push(r.current_A);
+              });
+              charts[m].update();
+            }
+          } catch (e) {
+            console.warn(`Failed to fetch history for ${m}`, e);
           }
         }
       }
-    });
 
-    // Pre-fill history data
-    try {
-      const res = await fetch(`/history/${m}`);
-      if (res.ok) {
-        const body = await res.json();
-        // Get the latest X points from history
-        const relevant = body.readings.slice(-MAX_DATAPOINTS);
-        
-        relevant.forEach(r => {
-          charts[m].data.labels.push(r.timestamp);
-          charts[m].data.datasets[0].data.push(r.temperature_C);
-          charts[m].data.datasets[1].data.push(r.vibration_mm_s);
-          charts[m].data.datasets[2].data.push(r.rpm);
-          charts[m].data.datasets[3].data.push(r.current_A);
-        });
-        charts[m].update();
+      // ── Colour & Trend Helpers ─────────────────────────────────────────────────
+      function tempClass(v) {
+        return v > 100 ? "crit" : v > 85 ? "warn" : "";
       }
-    } catch (e) {
-      console.warn(`Failed to fetch history for ${m}`, e);
-    }
-  }
-}
+      function vibClass(v) {
+        return v > 5 ? "crit" : v > 3 ? "warn" : "";
+      }
+      function currentClass(v) {
+        return v > 22 ? "crit" : v > 18 ? "warn" : "";
+      }
 
-// ── Colour & Trend Helpers ─────────────────────────────────────────────────
-function tempClass(v)    { return v > 100 ? "crit" : v > 85 ? "warn" : ""; }
-function vibClass(v)     { return v > 5   ? "crit" : v > 3   ? "warn" : ""; }
-function currentClass(v) { return v > 22  ? "crit" : v > 18  ? "warn" : ""; }
+      function updateTrend(id, currentVal, historyArr, threshold) {
+        historyArr.push(currentVal);
+        if (historyArr.length > 5) historyArr.shift(); // 5 datapoint moving window
 
-function updateTrend(id, currentVal, historyArr, threshold) {
-  historyArr.push(currentVal);
-  if (historyArr.length > 5) historyArr.shift(); // 5 datapoint moving window
-  
-  const el = document.getElementById(id);
-  if(!el || historyArr.length < 5) return;
-  
-  const avgBefore = historyArr.slice(0, 4).reduce((a,b)=>a+b, 0) / 4;
-  const diff = currentVal - avgBefore;
-  
-  if (Math.abs(diff) < threshold) {
-    el.className = "trend neutral"; el.innerHTML = "—";
-  } else if (diff > 0) {
-    el.className = "trend up-bad"; el.innerHTML = "↑";
-  } else {
-    el.className = "trend down-good"; el.innerHTML = "↓";
-  }
-}
+        const el = document.getElementById(id);
+        if (!el || historyArr.length < 5) return;
 
-// ── Apply SSE Readings ─────────────────────────────────────────────────────
-function applyReading(r) {
-  const m = r.machine_id;
+        const avgBefore = historyArr.slice(0, 4).reduce((a, b) => a + b, 0) / 4;
+        const diff = currentVal - avgBefore;
 
-  // 1. Update Badges
-  const badge = document.getElementById(`badge-${m}`);
-  if (badge) {
-    badge.className = `badge ${r.status}`;
-    badge.textContent = r.status.toUpperCase();
-  }
+        if (Math.abs(diff) < threshold) {
+          el.className = "trend neutral";
+          el.innerHTML = "—";
+        } else if (diff > 0) {
+          el.className = "trend up-bad";
+          el.innerHTML = "↑";
+        } else {
+          el.className = "trend down-good";
+          el.innerHTML = "↓";
+        }
+      }
 
-  // 2. Update Metric Numbers
-  const setVal = (id, val, cls) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.className = `metric-value${cls ? " " + cls : ""}`;
-    el.textContent = val;
-  };
+      // ── Apply SSE Readings ─────────────────────────────────────────────────────
+      function applyReading(r) {
+        const m = r.machine_id;
 
-  setVal(`temp-${m}`, r.temperature_C,  tempClass(r.temperature_C));
-  setVal(`vib-${m}`,  r.vibration_mm_s, vibClass(r.vibration_mm_s));
-  setVal(`rpm-${m}`,  r.rpm,            "");
-  setVal(`cur-${m}`,  r.current_A,      currentClass(r.current_A));
+        // 1. Update Badges
+        const badge = document.getElementById(`badge-${m}`);
+        if (badge) {
+          badge.className = `badge ${r.status}`;
+          badge.textContent = r.status.toUpperCase();
+        }
 
-  // 3. Update Trends
-  updateTrend(`trend-temp-${m}`, r.temperature_C, PREV_VALUES[m].temp, 1.0);
-  updateTrend(`trend-vib-${m}`, r.vibration_mm_s, PREV_VALUES[m].vib, 0.2);
-  updateTrend(`trend-rpm-${m}`, r.rpm, PREV_VALUES[m].rpm, 10.0);
-  updateTrend(`trend-cur-${m}`, r.current_A, PREV_VALUES[m].cur, 0.5);
+        // 2. Update Metric Numbers
+        const setVal = (id, val, cls) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.className = `metric-value${cls ? " " + cls : ""}`;
+          el.textContent = val;
+        };
 
-  const ts = document.getElementById(`ts-${m}`);
-  if (ts) ts.textContent = `Last update: ${new Date(r.timestamp).toLocaleTimeString()}`;
+        setVal(`temp-${m}`, r.temperature_C, tempClass(r.temperature_C));
+        setVal(`vib-${m}`, r.vibration_mm_s, vibClass(r.vibration_mm_s));
+        setVal(`rpm-${m}`, r.rpm, "");
+        setVal(`cur-${m}`, r.current_A, currentClass(r.current_A));
 
-  // 4. Update Interactive Charts
-  if (charts[m]) {
-    const chart = charts[m];
-    chart.data.labels.push(r.timestamp);
-    chart.data.datasets[0].data.push(r.temperature_C);
-    chart.data.datasets[1].data.push(r.vibration_mm_s);
-    chart.data.datasets[2].data.push(r.rpm);
-    chart.data.datasets[3].data.push(r.current_A);
+        // 3. Update Trends
+        updateTrend(
+          `trend-temp-${m}`,
+          r.temperature_C,
+          PREV_VALUES[m].temp,
+          1.0,
+        );
+        updateTrend(
+          `trend-vib-${m}`,
+          r.vibration_mm_s,
+          PREV_VALUES[m].vib,
+          0.2,
+        );
+        updateTrend(`trend-rpm-${m}`, r.rpm, PREV_VALUES[m].rpm, 10.0);
+        updateTrend(`trend-cur-${m}`, r.current_A, PREV_VALUES[m].cur, 0.5);
 
-    if (chart.data.labels.length > MAX_DATAPOINTS) {
-      chart.data.labels.shift();
-      chart.data.datasets[0].data.shift();
-      chart.data.datasets[1].data.shift();
-      chart.data.datasets[2].data.shift();
-      chart.data.datasets[3].data.shift();
-    }
-    chart.update();
-  }
-}
+        const ts = document.getElementById(`ts-${m}`);
+        if (ts)
+          ts.textContent = `Last update: ${new Date(r.timestamp).toLocaleTimeString()}`;
 
-// ── Event Loops ────────────────────────────────────────────────────────────
-initCharts().then(() => {
-  MACHINES.forEach(machineId => {
-    function connect() {
-      const es = new EventSource(`/stream/${machineId}`);
-      es.onmessage = e => { try { applyReading(JSON.parse(e.data)); } catch {} };
-      es.onerror   = () => { es.close(); setTimeout(connect, 3000); };
-    }
-    connect();
-  });
-});
+        // 4. Update Interactive Charts
+        if (charts[m]) {
+          const chart = charts[m];
+          chart.data.labels.push(r.timestamp);
+          chart.data.datasets[0].data.push(r.temperature_C);
+          chart.data.datasets[1].data.push(r.vibration_mm_s);
+          chart.data.datasets[2].data.push(r.rpm);
+          chart.data.datasets[3].data.push(r.current_A);
 
-let renderedAlertIds = new Set();
-let renderedMaintIds = new Set();
+          if (chart.data.labels.length > MAX_DATAPOINTS) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+            chart.data.datasets[1].data.shift();
+            chart.data.datasets[2].data.shift();
+            chart.data.datasets[3].data.shift();
+          }
+          chart.update();
+        }
+      }
 
-async function pollAlerts() {
-  try {
-    // Fetch Alerts
-    const resAlerts  = await fetch("/alerts");
-    const dataAlerts = await resAlerts.json();
-    const alertList = document.getElementById("alert-list");
-    
-    if (dataAlerts.count === 0) {
-      alertList.innerHTML = `<div class="no-alerts">Scanning systems... Zero anomalies detected.</div>`;
-    } else {
-      if (document.querySelector("#alert-list .no-alerts")) alertList.innerHTML = '';
-      const newAlerts = dataAlerts.alerts.filter(a => !renderedAlertIds.has(a.id));
-      if(newAlerts.length > 0) {
-        newAlerts.forEach(a => {
-            renderedAlertIds.add(a.id);
-            const html = `
+      // ── Event Loops ────────────────────────────────────────────────────────────
+      initCharts().then(() => {
+        MACHINES.forEach((machineId) => {
+          function connect() {
+            const es = new EventSource(`/stream/${machineId}`);
+            es.onmessage = (e) => {
+              try {
+                applyReading(JSON.parse(e.data));
+              } catch {}
+            };
+            es.onerror = () => {
+              es.close();
+              setTimeout(connect, 3000);
+            };
+          }
+          connect();
+        });
+      });
+
+      let renderedAlertIds = new Set();
+      let renderedMaintIds = new Set();
+
+      async function pollAlerts() {
+        try {
+          // Fetch Alerts
+          const resAlerts = await fetch("/alerts");
+          if (!resAlerts.ok) {
+            console.error("❌ Failed to fetch alerts:", resAlerts.status);
+            return;
+          }
+          const dataAlerts = await resAlerts.json();
+          const alertList = document.getElementById("alert-list");
+
+          if (dataAlerts.count === 0) {
+            alertList.innerHTML = `<div class="no-alerts">Scanning systems... Zero anomalies detected.</div>`;
+          } else {
+            if (document.querySelector("#alert-list .no-alerts"))
+              alertList.innerHTML = "";
+            const newAlerts = dataAlerts.alerts.filter(
+              (a) => !renderedAlertIds.has(a.id),
+            );
+            if (newAlerts.length > 0) {
+              console.log(
+                `✅ [ALERTS] ${newAlerts.length} new alert(s) received`,
+              );
+              newAlerts.forEach((a) => {
+                renderedAlertIds.add(a.id);
+                const html = `
               <div class="alert-item">
                 <span class="alert-machine">${a.machine_id}</span>
                 <span class="alert-reason">⚠️ ${a.reason}</span>
                 <span class="alert-time">${new Date(a.triggered_at).toLocaleTimeString()}</span>
               </div>
             `;
-            alertList.insertAdjacentHTML("afterbegin", html);
-        });
-      }
-    }
+                alertList.insertAdjacentHTML("afterbegin", html);
+              });
+            }
+          }
 
-    // Fetch Maintenances
-    const resMaint  = await fetch("/maintenances");
-    const dataMaint = await resMaint.json();
-    const maintList = document.getElementById("maintenance-list");
-    
-    if (dataMaint.count === 0) {
-      maintList.innerHTML = `<div class="no-alerts">No active maintenance bookings scheduled.</div>`;
-    } else {
-      if (document.querySelector("#maintenance-list .no-alerts")) maintList.innerHTML = '';
-      const newMaints = dataMaint.maintenances.filter(m => !renderedMaintIds.has(m.id));
-      if(newMaints.length > 0) {
-        newMaints.forEach(m => {
-            renderedMaintIds.add(m.id);
-            const html = `
+          // Fetch Maintenances
+          const resMaint = await fetch("/maintenances");
+          if (!resMaint.ok) {
+            console.error("❌ Failed to fetch maintenances:", resMaint.status);
+            return;
+          }
+          const dataMaint = await resMaint.json();
+          const maintList = document.getElementById("maintenance-list");
+
+          if (dataMaint.count === 0) {
+            maintList.innerHTML = `<div class="no-alerts">No active maintenance bookings scheduled.</div>`;
+          } else {
+            if (document.querySelector("#maintenance-list .no-alerts"))
+              maintList.innerHTML = "";
+            const newMaints = dataMaint.maintenances.filter(
+              (m) => !renderedMaintIds.has(m.id),
+            );
+            if (newMaints.length > 0) {
+              console.log(
+                `✅ [MAINTENANCE] ${newMaints.length} new booking(s)`,
+              );
+              newMaints.forEach((m) => {
+                renderedMaintIds.add(m.id);
+                const html = `
               <div class="maint-item">
                 <span class="maint-machine">${m.machine_id}</span>
                 <span class="maint-reason">🔧 Booked for: ${new Date(m.slot).toLocaleString()}</span>
                 <span class="alert-time">${new Date(m.booked_at).toLocaleTimeString()}</span>
               </div>
             `;
-            maintList.insertAdjacentHTML("afterbegin", html);
-        });
+                maintList.insertAdjacentHTML("afterbegin", html);
+              });
+            }
+          }
+        } catch (err) {
+          console.error("❌ Alert polling error:", err);
+        }
       }
-    }
-  } catch {}
-}
-setInterval(pollAlerts, 2000);
-pollAlerts();
+      setInterval(pollAlerts, 2000);
+      pollAlerts();
 
-setInterval(() => {
-  document.getElementById("clock").textContent = new Date().toLocaleTimeString();
-}, 1000);
-</script>
-</body>
+      setInterval(() => {
+        document.getElementById("clock").textContent =
+          new Date().toLocaleTimeString();
+      }, 1000);
+    </script>
+  </body>
 </html>
